@@ -1,70 +1,268 @@
-# Getting Started with Create React App
+- [1. App start](#1-app-start)
+- [2. Conenction to Django API](#2-conenction-to-django-api)
+  - [2.1. `axios` library](#21-axios-library)
+- [3. React annotations](#3-react-annotations)
+- [4. Django API annotations](#4-django-api-annotations)
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-## Available Scripts
+## 1. App start
 
-In the project directory, you can run:
+1. Start the Django server
+```bash
+python manage.py runserver
+```
+2. Start the React server
+```bash
+npm start
+```
 
-### `npm start`
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## 2. Conenction to Django API
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+### 2.1. `axios` library
 
-### `npm test`
+`PUT`, `POST`, `DELETE` and `GET` requests are made to Django API using `axios` library.
+```jsx
+const editStudent =  e => {
+      e.preventDefault();
+        axios.put(`${API_URL}${formData.pk}/`, formData) // PUT request
+        .then(() => {
+          refreshState();
+          toggle();
+        })
+        .catch (error => {
+          console.log('Error editing student: ', error);
+        });
+    };
+```
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
 
-### `npm run build`
+## 3. React annotations
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+Class components are converted to functional components using hooks and `useState` and `useEffect` hooks are used to manage the state of the components. This way the code is more readable and easier to maintain.\
+Additionally the axios requests are handles with `try` and `catch` blocks to handle errors - in case in Django API the `serializer.is_valid()` method returns `False`.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Initial approach:
+```jsx
+// Class component using 'this' keyword to access the props and state
+class NewStudentForm extends React.Component {
+  state = {
+    pk: 0,
+    name: "",
+    email: "",
+    document: "",
+    phone: ""
+  };
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+  componentDidMount() {
+    if (this.props.student) {
+      const { pk, name, document, email, phone } = this.props.student;
+      this.setState({ pk, name, document, email, phone });
+    }
+  }
 
-### `npm run eject`
+  onChange = e => {
+    this.setState({ [e.target.name]: e.target.value });
+  };
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+  createStudent = e => {
+    e.preventDefault();
+    axios.post(API_URL, this.state).then(() => {
+      this.props.resetState();
+      this.props.toggle();
+    });
+  };
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+  editStudent = e => {
+    e.preventDefault();
+    axios.put(API_URL + this.state.pk, this.state).then(() => {
+      this.props.resetState();
+      this.props.toggle();
+    });
+  };
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+  defaultIfEmpty = value => {
+    return value === "" ? "" : value;
+  };
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+  render() {
+    return (
+      <Form onSubmit={this.props.student ? this.editStudent : this.createStudent}>
+        <FormGroup>
+          <Label for="name">Name:</Label>
+          <Input
+            type="text"
+            name="name"
+            onChange={this.onChange}
+            value={this.defaultIfEmpty(this.state.name)}
+          />
+        </FormGroup>
+        <FormGroup>
+          <Label for="email">Email:</Label>
+          <Input
+            type="email"
+            name="email"
+            onChange={this.onChange}
+            value={this.defaultIfEmpty(this.state.email)}
+          />
+        </FormGroup>
+        <FormGroup>
+          <Label for="document">Document:</Label>
+          <Input
+            type="text"
+            name="document"
+            onChange={this.onChange}
+            value={this.defaultIfEmpty(this.state.document)}
+          />
+        </FormGroup>
+        <FormGroup>
+          <Label for="phone">Phone:</Label>
+          <Input
+            type="text"
+            name="phone"
+            onChange={this.onChange}
+            value={this.defaultIfEmpty(this.state.phone)}
+          />
+        </FormGroup>
+        <Button>Send</Button>
+      </Form>
+    );
+  }
+}
+```
 
-## Learn More
+Final approach:
+```jsx
+// Functional component using 'useState' and 'useEffect' hooks to manage the state.
+// This way the code is more readable and easier to maintain.
+const NewStudentForm = ({refreshState, toggle, student }) => {
+  const [formData, setFormData] = useState({
+    pk: 0,
+    name: '',
+    email: '',
+    document: '',
+    phone: ''
+  });
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+  useEffect(() => {
+    if (student) {
+      setFormData({
+        pk:       student.pk,
+        name:     student.name, 
+        email:    student.email, 
+        document: student.document, 
+        phone:    student.phone
+      });
+    };
+  }, [student]);
+  
+  const onChange = e => {
+    setFormData(prevState => ({
+      ...prevState,
+      [e.target.name]: e.target.value
+    }));
+  };
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+  const createStudent = e => {
+    e.preventDefault();
+    axios.post(API_URL, formData)
+    .then(() => {
+      refreshState();
+      toggle();
+    })
+    .catch (error => { 
+      console.log('Error creating student: ', error);
+    });
+  };
 
-### Code Splitting
+  const editStudent = e => {
+    e.preventDefault();
+    axios.put(`${API_URL}${formData.pk}/`, formData)
+    .then(() => {
+      refreshState();
+      toggle();
+    })
+    .catch (error => {
+      console.log('Error editing student: ', error);
+    });
+  };
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+  const defaultIfEmpty = (value) => (value === "" ? "" : value);
+  
+  return (
+    <Form onSubmit={student ? editStudent : createStudent}>
+      <FormGroup>
+        <Label for="name">Name:</Label>
+        <Input
+          type="text"
+          name="name"
+          onChange={onChange}
+          value={defaultIfEmpty(formData.name)}
+        />
+      </FormGroup>
+      <FormGroup>
+        <Label for="email">Email:</Label>
+        <Input
+          type="email"
+          name="email"
+          onChange={onChange}
+          value={defaultIfEmpty(formData.email)}
+        />
+      </FormGroup>
+      <FormGroup>
+        <Label for="document">Document:</Label>
+        <Input
+          type="text"
+          name="document"
+          onChange={onChange}
+          value={defaultIfEmpty(formData.document)}
+        />
+      </FormGroup>
+      <FormGroup>
+        <Label for="phone">Phone:</Label>
+        <Input
+          type="text"
+          name="phone"
+          onChange={onChange}
+          value={defaultIfEmpty(formData.phone)}
+        />
+      </FormGroup>
+      <Button>Send</Button>
+    </Form>
+  );
+};
+```
 
-### Analyzing the Bundle Size
+## 4. Django API annotations
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+Instead of function based views, class based views are used to manage the API endpoints. This way the code is more readable and easier to maintain.
 
-### Making a Progressive Web App
+Initial approach:
+```python
+# Function based view to manage the API endpoints
+@api_view(['GET', 'POST'])
+def students_list(request):
+    if request.method == 'GET':
+        data = Student.objects.all()
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+        serializer = StudentSerializer(data, context={'request': request}, many=True)
 
-### Advanced Configuration
+        return Response(serializer.data)
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+    elif request.method == 'POST':
+        serializer = StudentSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(status=status.HTTP_201_CREATED)
 
-### Deployment
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Final approach:
+```python
+#  Simplified class based view to manage the API endpoints
+#  ListCreateAPIView handles the GET and POST requests
+class StudentList(ListCreateAPIView):
+    queryset = Student.objects.all()
+    serializer_class = StudentSerializer
+```
