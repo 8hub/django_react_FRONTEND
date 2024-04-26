@@ -1,4 +1,4 @@
-import React, { Component, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Col, Container, Row } from "reactstrap";
 import StudentList from "./StudentList";
 import NewStudentModal from "./NewStudentModal";
@@ -7,7 +7,7 @@ import axios from "axios";
 
 import { API_URL } from "../constants";
 
-const Home = () => {
+function Home({ darkMode, setDarkMode }) {
   const [students, setStudents] = useState([]);
 
   useEffect(() => {
@@ -26,7 +26,7 @@ const Home = () => {
     <Container style={{ marginTop: "20px" }} className="dark-mode">
       <Row>
         <Col>
-          <StudentList students={students} refreshState={refreshState} />
+          <StudentList students={students} refreshState={refreshState} darkMode={darkMode}/>
         </Col>
       </Row>
       <Row>
@@ -34,6 +34,9 @@ const Home = () => {
           <NewStudentModal create={true} refreshState={refreshState} />
         </Col>
       </Row>
+      <button onClick={() => setDarkMode(!darkMode)}>
+        Toggle to {darkMode ? 'Light' : 'Dark'} Mode
+      </button>
     </Container>
   );
 };

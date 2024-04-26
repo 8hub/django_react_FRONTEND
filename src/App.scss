@@ -1,0 +1,106 @@
+@import "../node_modules/bootstrap/scss/bootstrap.scss";
+
+/* Light Theme Colors */
+:root {
+  --background-color: #ffffff; /* Pure white for a clean look */
+  --text-color: #212529;       /* A very dark gray for high contrast text */
+  --header-bg-color: #f8f9fa;  /* A very light gray for subtle headers */
+  --link-color: #007bff;       /* A bright blue for links to stand out */
+  --footer-bg-color: #e9ecef;  /* Slightly darker than header for footer distinction */
+  --button-bg-color: #007bff;  /* Same as link color for consistency */
+  --button-text-color: #ffffff;/* White text on colored buttons for readability */
+}
+
+/* Dark Theme Colors - Dark Blue Theme */
+[data-theme="dark"] {
+  --background-color: #162447 ; /* Dark blue background for a deep, rich feel */
+  --text-color: #f8f9fa;       /* Soft white for text to ensure readability */
+  --header-bg-color: #1f4068;  /* Slightly lighter blue for headers to differentiate from the background */
+  --link-color: #4dabf7;       /* Vibrant blue for links to maintain visibility and interest */
+  --footer-bg-color: #1b2845;  /* A variation of the background color for footer */
+  --button-bg-color: #1b2845;  /* Darkened blue for buttons to blend with the theme */
+  --button-text-color: #e0e1dd;/* Off-white for button texts to ensure they are distinguishable */
+}
+
+body {
+  background-color: var(--background-color);
+  color: var(--text-color);
+  font-family: Arial, sans-serif; /* Ensuring a modern, sans-serif font is used for readability */
+}
+
+.App {
+  text-align: center;
+  background-color: var(--background-color);
+  color: var(--text-color);
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.App-header {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+}
+
+.table-dark{
+  --bs-table-bg: #162447;
+  --bs-table-accent-bg: var(--background-color);
+  --bs-table-striped-color: #f8f9fa;
+  --bs-table-striped-bg: #1f4068;
+  --bs-table-active-color: #f8f9fa;
+  --bs-table-active-bg: #1f4068;
+  --bs-table-hover-color: #f8f9fa;
+  --bs-table-hover-bg: #1f4068;
+}
+
+@keyframes flyUp_part1 {
+  from {
+    transform: translate(0, 0);
+    opacity: 1;
+  }
+  to {
+    transform: translate(0, -25px);
+    opacity: 0;
+  }
+}
+@keyframes flyUp_part2 {
+  from {
+    transform: translate(0, 25px);
+    opacity: 0;
+  }
+  to {
+    transform: translate(0, 0);
+    opacity: 1;
+  }
+}
+
+.icon-plane {
+  display: inline-block;
+  vertical-align: middle;
+  transition: transform 0.3s ease;
+}
+
+.icon-plane.animate {
+  animation: flyUp_part1 1s linear forwards, flyUp_part2 1s linear 1s forwards;
+}

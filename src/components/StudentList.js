@@ -4,9 +4,9 @@ import NewStudentModal from './NewStudentModal';
 
 import ConfirmRemovalModal from './ConfirmRemovalModal';
 
-const StudentList = ({students, refreshState}) => {
+const StudentList = ({students, refreshState, darkMode}) => {
     return (
-        <Table dark>
+        <Table className={`table-hover ${darkMode ? "table-dark" : ''}`}>
             <thead>
                 <tr>
                     <th>Name</th>
